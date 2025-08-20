@@ -19,6 +19,7 @@ repositories {
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+    implementation("io.github.dreamvoid:MiraiMC-Velocity:1.9.2")
 }
 
 tasks {
