@@ -12,6 +12,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -30,13 +31,15 @@ public class Acore {
     private final Path dataDirectory;
     private ConfigManager configManager;
     private DatabaseManager databaseManager;
+    private final Metrics.Factory metricsFactory;
 
 
     @Inject
-    public Acore(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    public Acore(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
         this.server = server;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
+        this.metricsFactory = metricsFactory;
         logger.info("Acore plugin initialized with version: {}", BuildConstants.VERSION);
     }
 
@@ -44,6 +47,7 @@ public class Acore {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         loadConfig();
         loadDatabase();
+        setUpBStats();
         server.getEventManager().register(this, new MessageListener(server));
         scheduleTasks();
     }
@@ -83,6 +87,11 @@ public class Acore {
     public void onProxyShutdown(ProxyShutdownEvent event) {
         databaseManager.shutdown();
         logger.info("Database closed.");
+    }
+
+    private void setUpBStats() {
+        int pluginId = 27159;
+        Metrics metrics = metricsFactory.make(this, pluginId);
     }
 }
 

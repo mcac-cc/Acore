@@ -50,9 +50,6 @@ public class ConfigManager {
         }
     }
 
-    /**
-     * Load config from disk into memory.
-     */
     public void load() throws IOException {
         ConfigurationNode node = loader.load();
         this.cached = node.get(PluginConfig.class);
@@ -62,19 +59,6 @@ public class ConfigManager {
         logger.info("Successfully loaded configuration at {}", configPath);
     }
 
-    /**
-     * Save current in-memory config back to disk.
-     */
-    public void save() throws IOException {
-        ConfigurationNode node = loader.load();
-        node.set(PluginConfig.class, this.cached);
-        loader.save(node);
-        logger.info("Successfully saved configuration at {}", configPath);
-    }
-
-    /**
-     * Get current config snapshot (immutable reference holder).
-     */
     public PluginConfig getPluginConfig() {
         return this.cached;
     }
