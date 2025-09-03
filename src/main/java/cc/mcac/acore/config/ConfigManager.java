@@ -75,7 +75,7 @@ public class ConfigManager {
     /**
      * Get current config snapshot (immutable reference holder).
      */
-    public PluginConfig get() {
+    public PluginConfig getPluginConfig() {
         return this.cached;
     }
 

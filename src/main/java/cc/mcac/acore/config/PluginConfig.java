@@ -5,8 +5,11 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
 public class PluginConfig {
-    @Setting("server")
-    public String server = "velocity";
+    @Setting("server-id")
+    public String serverId = "velocity";
+
+    @Setting("player-list-to-db-interval")
+    public  int playerListToDbInterval = 60;
 
     @Setting("database")
     public Database database = new Database();

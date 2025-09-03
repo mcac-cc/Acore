@@ -2,7 +2,9 @@ package cc.mcac.acore;
 
 import cc.mcac.acore.bot.MessageListener;
 import cc.mcac.acore.config.ConfigManager;
+import cc.mcac.acore.config.PluginConfig;
 import cc.mcac.acore.database.DatabaseManager;
+import cc.mcac.acore.task.PlayerListTask;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
@@ -13,6 +15,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 @Plugin(
         id = "acore",
@@ -42,15 +45,38 @@ public class Acore {
         loadConfig();
         loadDatabase();
         server.getEventManager().register(this, new MessageListener(server));
+        scheduleTasks();
+    }
+
+    private void scheduleTasks() {
+        server.getScheduler().buildTask(this, new PlayerListTask(this))
+                .repeat(configManager.getPluginConfig().playerListToDbInterval, TimeUnit.SECONDS)
+                .schedule();
     }
 
     private void loadConfig() {
         this.configManager = new ConfigManager(logger, dataDirectory);
-        logger.info("Acore config loaded on server: {}", configManager.get().server);
+        logger.info("Acore config loaded on server: {}", configManager.getPluginConfig().serverId);
+    }
+
+    public PluginConfig getPluginConfig() {
+        return this.configManager.getPluginConfig();
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public ProxyServer getServer() {
+        return server;
     }
 
     private void loadDatabase() {
-        this.databaseManager = new DatabaseManager(logger, configManager);
+        this.databaseManager = new DatabaseManager(this);
     }
 
     @Subscribe
