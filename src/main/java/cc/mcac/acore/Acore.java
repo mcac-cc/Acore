@@ -4,7 +4,7 @@ import cc.mcac.acore.bot.MessageListener;
 import cc.mcac.acore.config.ConfigManager;
 import cc.mcac.acore.config.PluginConfig;
 import cc.mcac.acore.database.DatabaseManager;
-import cc.mcac.acore.task.PlayerListTask;
+import cc.mcac.acore.task.TaskManager;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
@@ -16,7 +16,6 @@ import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
 
 @Plugin(
         id = "acore",
@@ -32,6 +31,7 @@ public class Acore {
     private ConfigManager configManager;
     private DatabaseManager databaseManager;
     private final Metrics.Factory metricsFactory;
+    private TaskManager taskManager;
 
 
     @Inject
@@ -49,13 +49,12 @@ public class Acore {
         loadDatabase();
         setUpBStats();
         server.getEventManager().register(this, new MessageListener(server));
-        scheduleTasks();
+        startTasks();
     }
 
-    private void scheduleTasks() {
-        server.getScheduler().buildTask(this, new PlayerListTask(this))
-                .repeat(configManager.getPluginConfig().playerListToDbInterval, TimeUnit.SECONDS)
-                .schedule();
+    private void startTasks() {
+        this.taskManager = new TaskManager(this);
+        taskManager.startAllTasks();
     }
 
     private void loadConfig() {
@@ -85,6 +84,9 @@ public class Acore {
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
+        if (taskManager != null) {
+            taskManager.stopAllTasks();
+        }
         databaseManager.shutdown();
         logger.info("Database closed.");
     }
